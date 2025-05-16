@@ -4,10 +4,12 @@ const pool = require('../db/database'); // PostgreSQL connection pool
 
 // Helper to generate endpoints for a table
 const createMasterRoutes = (tableName) => {
+  const columnName = tableName; // assuming column name is same as table name
+
   // Get all items
   router.get(`/${tableName}`, async (req, res) => {
     try {
-      const result = await pool.query(`SELECT ${tableName} FROM "${tableName}"`);
+      const result = await pool.query(`SELECT ${columnName} FROM ${tableName}`);
       res.json(result.rows);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -21,7 +23,7 @@ const createMasterRoutes = (tableName) => {
 
     try {
       const result = await pool.query(
-        `INSERT INTO "${tableName}" (${tableName}) VALUES ($1) RETURNING *`,
+        `INSERT INTO ${tableName} (${columnName}) VALUES ($1) RETURNING *`,
         [value]
       );
       res.json(result.rows[0]);
@@ -36,7 +38,7 @@ const createMasterRoutes = (tableName) => {
 
     try {
       const result = await pool.query(
-        `DELETE FROM "${tableName}" WHERE ${tableName} = $1`,
+        `DELETE FROM ${tableName} WHERE ${columnName} = $1`,
         [value]
       );
       if (result.rowCount === 0) return res.status(404).json({ message: "Not found" });
@@ -47,7 +49,7 @@ const createMasterRoutes = (tableName) => {
   });
 };
 
-// Register all 3 master tables
-['Design', 'Company', 'Courier'].forEach(createMasterRoutes);
+// Register all 3 master tables (in lowercase)
+['design', 'company', 'courier'].forEach(createMasterRoutes);
 
 module.exports = router;

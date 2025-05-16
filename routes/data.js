@@ -1,15 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db/database'); // PostgreSQL pool
+const pool = require('../db/database');
 
 // ----------------------------
 // Master Routes (Design, Company, Courier)
 // ----------------------------
 const createMasterRoutes = (tableName) => {
+  const table = tableName.toLowerCase();
+
   // GET All
-  router.get(`/${tableName}`, async (req, res) => {
+  router.get(`/${table}`, async (req, res) => {
     try {
-      const result = await pool.query(`SELECT ${tableName} FROM "${tableName}"`);
+      const result = await pool.query(`SELECT ${table} FROM ${table}`);
       res.json(result.rows);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -17,13 +19,13 @@ const createMasterRoutes = (tableName) => {
   });
 
   // POST
-  router.post(`/${tableName}`, async (req, res) => {
-    const value = req.body[tableName];
-    if (!value) return res.status(400).json({ error: `${tableName} is required` });
+  router.post(`/${table}`, async (req, res) => {
+    const value = req.body[table];
+    if (!value) return res.status(400).json({ error: `${table} is required` });
 
     try {
       const result = await pool.query(
-        `INSERT INTO "${tableName}" (${tableName}) VALUES ($1) RETURNING *`,
+        `INSERT INTO ${table} (${table}) VALUES ($1) RETURNING *`,
         [value]
       );
       res.json(result.rows[0]);
@@ -33,11 +35,11 @@ const createMasterRoutes = (tableName) => {
   });
 
   // DELETE
-  router.delete(`/${tableName}/:value`, async (req, res) => {
+  router.delete(`/${table}/:value`, async (req, res) => {
     const value = req.params.value;
     try {
       const result = await pool.query(
-        `DELETE FROM "${tableName}" WHERE ${tableName} = $1`,
+        `DELETE FROM ${table} WHERE ${table} = $1`,
         [value]
       );
       if (result.rowCount === 0) return res.status(404).json({ message: "Not found" });
@@ -48,13 +50,12 @@ const createMasterRoutes = (tableName) => {
   });
 };
 
-['Design', 'Company', 'Courier'].forEach(createMasterRoutes);
+['design', 'company', 'courier'].forEach(createMasterRoutes);
 
 // ----------------------------
 // ReturnMaster routes
 // ----------------------------
 
-// Insert
 router.post('/return-master', async (req, res) => {
   const { user_id, company, courier, date, no_return } = req.body;
   if (!user_id || !company || !courier || !date || no_return === undefined) {
@@ -63,7 +64,7 @@ router.post('/return-master', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO "ReturnMaster" (user_id, company, courier, date, no_return)
+      `INSERT INTO returnmaster (user_id, company, courier, date, no_return)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [user_id, company, courier, date, no_return]
@@ -74,22 +75,20 @@ router.post('/return-master', async (req, res) => {
   }
 });
 
-// Get All
 router.get('/return-master', async (req, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM "ReturnMaster"`);
+    const result = await pool.query(`SELECT * FROM returnmaster`);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Grouped Report
 router.get('/report/return-master', async (req, res) => {
   const { company, courier, date } = req.query;
   let sql = `
     SELECT company, courier, DATE(date) as date, SUM(no_return) AS no_return
-    FROM "ReturnMaster"
+    FROM returnmaster
     WHERE 1=1
   `;
   const params = [];
@@ -122,7 +121,6 @@ router.get('/report/return-master', async (req, res) => {
 // ReturnDetailedEntry routes
 // ----------------------------
 
-// Insert
 router.post('/return-detailed-entry', async (req, res) => {
   const { user_id, company, courier, date, design, quantity } = req.body;
   if (!user_id || !company || !courier || !date || !design || quantity === undefined) {
@@ -131,7 +129,7 @@ router.post('/return-detailed-entry', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO "ReturnDetailedEntry" (user_id, company, courier, date, design, quantity)
+      `INSERT INTO returndetailedentry (user_id, company, courier, date, design, quantity)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
       [user_id, company, courier, date, design, quantity]
@@ -142,22 +140,20 @@ router.post('/return-detailed-entry', async (req, res) => {
   }
 });
 
-// Get All
 router.get('/return-detailed-entry', async (req, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM "ReturnDetailedEntry"`);
+    const result = await pool.query(`SELECT * FROM returndetailedentry`);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Grouped Report
 router.get('/report/return-detailed-entry', async (req, res) => {
   const { company, courier, date } = req.query;
   let sql = `
     SELECT company, courier, DATE(date) as date, design, SUM(quantity) AS quantity
-    FROM "ReturnDetailedEntry"
+    FROM returndetailedentry
     WHERE 1=1
   `;
   const params = [];
