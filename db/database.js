@@ -1,12 +1,9 @@
-// db/database.js
+require('dotenv').config(); // Must be at the top
+
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  user: 'akash',         // from Render PostgreSQL
-  host: 'dpg-d0jj4memcj7s7382sc0g-a.render.com',         // e.g., your-db-name.render.com
-  database: 'returnprocessorapp', // database name from Render
-  password: 'apBWDLvPq0kax79uXEkbRdiD3WcQGGyq', // your Render PostgreSQL password
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }
@@ -17,3 +14,4 @@ pool.connect()
   .catch((err) => console.error('Connection error:', err.stack));
 
 module.exports = pool;
+
