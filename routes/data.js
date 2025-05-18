@@ -214,6 +214,44 @@ router.post('/billing', async (req, res) => {
 });
 
 
+
+router.get('/billing', async (req, res) => {
+  const { date, company, portal } = req.query;
+
+  if (!date) {
+    return res.status(400).json({ error: 'Date query parameter is required.' });
+  }
+
+  try {
+    if (!company) {
+      // 1. Get distinct companies billed on the given date (optionally filter by portal)
+      const query = portal
+        ? `SELECT DISTINCT company FROM billing WHERE date = $1 AND portal = $2`
+        : `SELECT DISTINCT company FROM billing WHERE date = $1`;
+      const values = portal ? [date, portal] : [date];
+
+      const result = await pool.query(query, values);
+      const companies = result.rows.map(row => row.company);
+      return res.status(200).json({ companies });
+    } else {
+      // 2. Get all billing entries for that company on the given date (optionally filter by portal)
+      const query = portal
+        ? `SELECT * FROM billing WHERE date = $1 AND company = $2 AND portal = $3 ORDER BY design`
+        : `SELECT * FROM billing WHERE date = $1 AND company = $2 ORDER BY design`;
+      const values = portal ? [date, company, portal] : [date, company];
+
+      const result = await pool.query(query, values);
+      return res.status(200).json(result.rows);
+    }
+  } catch (error) {
+    console.error('Error fetching billing data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
 router.get('/portal', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM portal_master');
