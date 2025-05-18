@@ -290,6 +290,18 @@ router.delete('/portal/:portal', async (req, res) => {
 });
 
 
+// Node/Express route example
+router.get("/billing/distinct-companies", async (req, res) => {
+  const { date } = req.query;
+  if (!date) return res.status(400).json({ error: "Date is required" });
+
+  const result = await db.query(
+    `SELECT DISTINCT company FROM billing WHERE date = $1`,
+    [date]
+  );
+  res.json(result.rows); // Or map to result.rows.map(r => r.company)
+});
+
 
 
 module.exports = router;
