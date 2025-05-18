@@ -183,44 +183,34 @@ router.get('/report/return-detailed-entry', async (req, res) => {
 });
 
 
-router.post('/api/data/billing', async (req, res) => {
-  const billingData = req.body;
-
-  if (!Array.isArray(billingData) || billingData.length === 0) {
-    return res.status(400).json({ error: 'Invalid billing data' });
-  }
-
-  const client = await pool.connect();
-
+router.post('/billing', async (req, res) => {
   try {
-    await client.query('BEGIN');
+    const billingEntries = req.body; // expects array of entries
+
+    if (!Array.isArray(billingEntries)) {
+      return res.status(400).json({ error: 'Expected an array of billing entries.' });
+    }
 
     const insertQuery = `
-      INSERT INTO billing (design, quantity, company, courier, date, user_id)
+      INSERT INTO billing (user_id, company, courier, date, design, quantity)
       VALUES ($1, $2, $3, $4, $5, $6)
     `;
 
-    for (const row of billingData) {
-      const { design, quantity, company, courier, date, user_id } = row;
+    for (const entry of billingEntries) {
+      const { user_id, company, courier, date, design, quantity } = entry;
 
-      // Basic validation
-      if (!design || !quantity || !company || !courier || !date || !user_id) {
-        throw new Error('Missing required fields');
+      if (!user_id || !company || !courier || !date || !design || !quantity) {
+        return res.status(400).json({ error: 'Missing fields in some billing entries.' });
       }
 
-      await client.query(insertQuery, [design, quantity, company, courier, date, user_id]);
+      await pool.query(insertQuery, [user_id, company, courier, date, design, quantity]);
     }
 
-    await client.query('COMMIT');
-    res.status(200).json({ message: 'Billing data inserted successfully' });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('Error inserting billing data:', err);
+    res.status(200).json({ message: 'Billing data inserted successfully.' });
+  } catch (error) {
+    console.error('Error inserting billing data:', error);
     res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    client.release();
   }
 });
-
 
 module.exports = router;
