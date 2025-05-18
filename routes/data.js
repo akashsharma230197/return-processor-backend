@@ -50,7 +50,7 @@ const createMasterRoutes = (tableName) => {
   });
 };
 
-['design', 'company', 'courier','portal'].forEach(createMasterRoutes);
+['design', 'company', 'courier'].forEach(createMasterRoutes);
 
 // ----------------------------
 // ReturnMaster routes
@@ -213,6 +213,43 @@ router.post('/billing', async (req, res) => {
   }
 });
 
+
+router.get('/portal', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM portal_master');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+// POST a new portal
+router.post('/portal', async (req, res) => {
+  const { portal } = req.body;
+  try {
+    await pool.query('INSERT INTO portal_master (portal) VALUES ($1) ON CONFLICT DO NOTHING', [portal]);
+    res.send('Portal added');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+
+
+
+
+router.delete('/portal/:portal', async (req, res) => {
+  const { portal } = req.params;
+  try {
+    await pool.query('DELETE FROM portal_master WHERE portal = $1', [portal]);
+    res.status(200).json({ message: 'Deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Deletion failed' });
+  }
+});
 
 
 
