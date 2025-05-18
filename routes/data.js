@@ -192,18 +192,18 @@ router.post('/billing', async (req, res) => {
     }
 
     const insertQuery = `
-      INSERT INTO billing (user_id, company, courier, date, design, quantity)
+      INSERT INTO billing (user_id, company, portal, date, design, quantity)
       VALUES ($1, $2, $3, $4, $5, $6)
     `;
 
     for (const entry of billingEntries) {
-      const { user_id, company, courier, date, design, quantity } = entry;
+      const { user_id, company, portal, date, design, quantity } = entry;
 
-      if (!user_id || !company || !courier || !date || !design || !quantity) {
+      if (!user_id || !company || !portal || !date || !design || !quantity) {
         return res.status(400).json({ error: 'Missing fields in some billing entries.' });
       }
 
-      await pool.query(insertQuery, [user_id, company, courier, date, design, quantity]);
+      await pool.query(insertQuery, [user_id, company, portal, date, design, quantity]);
     }
 
     res.status(200).json({ message: 'Billing data inserted successfully.' });
