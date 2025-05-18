@@ -182,4 +182,45 @@ router.get('/report/return-detailed-entry', async (req, res) => {
   }
 });
 
+
+router.post('/api/data/billing', async (req, res) => {
+  const billingData = req.body;
+
+  if (!Array.isArray(billingData) || billingData.length === 0) {
+    return res.status(400).json({ error: 'Invalid billing data' });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const insertQuery = `
+      INSERT INTO billing (design, quantity, company, courier, date, user_id)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `;
+
+    for (const row of billingData) {
+      const { design, quantity, company, courier, date, user_id } = row;
+
+      // Basic validation
+      if (!design || !quantity || !company || !courier || !date || !user_id) {
+        throw new Error('Missing required fields');
+      }
+
+      await client.query(insertQuery, [design, quantity, company, courier, date, user_id]);
+    }
+
+    await client.query('COMMIT');
+    res.status(200).json({ message: 'Billing data inserted successfully' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error inserting billing data:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
+
 module.exports = router;
