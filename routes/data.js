@@ -50,7 +50,7 @@ const createMasterRoutes = (tableName) => {
   });
 };
 
-['design', 'company', 'courier'].forEach(createMasterRoutes);
+['design', 'company', 'courier','portal'].forEach(createMasterRoutes);
 
 // ----------------------------
 // ReturnMaster routes
@@ -215,28 +215,6 @@ router.post('/billing', async (req, res) => {
 
 
 
-
-router.get('/portal', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM portal_master');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
-
-// POST a new portal
-router.post('/portal', async (req, res) => {
-  const { portal } = req.body;
-  try {
-    await pool.query('INSERT INTO portal_master (portal) VALUES ($1) ON CONFLICT DO NOTHING', [portal]);
-    res.send('Portal added');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
 
 
 module.exports = router;
