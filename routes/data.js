@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/database');
 
+const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const app = express();
+
 // ----------------------------
 // Master Routes (Design, Company, Courier)
 // ----------------------------
@@ -302,6 +307,51 @@ router.get("/billing/distinct-companies", async (req, res) => {
   res.json(result.rows); // Or map to result.rows.map(r => r.company)
 });
 
+
+
+
+
+
+
+
+
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+
+
+
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
+
+app.post('/api/staff', upload.fields([{ name: 'aadhar_photo' }, { name: 'profile_pic' }]), async (req, res) => {
+  const {
+    name, guardian_name, aadhar_number,
+    delhi_address, permanent_address,
+    emergency_contact_name, emergency_contact_number,
+  } = req.body;
+
+  const profile_pic = req.files?.profile_pic?.[0]?.filename || '';
+  const aadhar_photo = req.files?.aadhar_photo?.[0]?.filename || '';
+
+  try {
+    await pool.query(
+      `INSERT INTO staff (name, guardian_name, aadhar_number, delhi_address, permanent_address, emergency_contact_name, emergency_contact_number, profile_pic, aadhar_photo)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [name, guardian_name, aadhar_number, delhi_address, permanent_address, emergency_contact_name, emergency_contact_number, profile_pic, aadhar_photo]
+    );
+    res.status(201).json({ message: 'Staff saved successfully' });
+  } catch (err) {
+    console.error('Error saving staff:', err);
+    res.status(500).json({ error: 'Failed to save staff' });
+  }
+});
 
 
 module.exports = router;
