@@ -308,6 +308,29 @@ router.get("/billing/distinct-companies", async (req, res) => {
 
 
 
+router.get('/api/data/login_id', async (req, res) => {
+  const { company, portal } = req.query;
+
+  if (!company || !portal) {
+    return res.status(400).json({ error: 'Company and portal are required.' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT login_id FROM portal_id WHERE company = $1 AND portal = $2 LIMIT 1',
+      [company, portal]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ login_id: null });
+    }
+
+    res.json({ login_id: result.rows[0].login_id });
+  } catch (err) {
+    console.error('Error fetching login_id:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 
