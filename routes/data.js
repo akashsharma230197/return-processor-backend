@@ -334,6 +334,86 @@ router.get('/login_id', async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.get('/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM portal_id ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching portal_id entries:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add new portal_id entry
+router.post('/', async (req, res) => {
+  const { company, portal, login_id } = req.body;
+  if (!company || !portal || !login_id) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+  try {
+    await pool.query(
+      'INSERT INTO portal_id (company, portal, login_id) VALUES ($1, $2, $3)',
+      [company, portal, login_id]
+    );
+    res.status(201).json({ message: 'Entry added' });
+  } catch (err) {
+    console.error('Error adding portal_id entry:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update portal_id entry
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { company, portal, login_id } = req.body;
+  try {
+    await pool.query(
+      'UPDATE portal_id SET company = $1, portal = $2, login_id = $3 WHERE id = $4',
+      [company, portal, login_id, id]
+    );
+    res.json({ message: 'Entry updated' });
+  } catch (err) {
+    console.error('Error updating portal_id entry:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete portal_id entry
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM portal_id WHERE id = $1', [id]);
+    res.json({ message: 'Entry deleted' });
+  } catch (err) {
+    console.error('Error deleting portal_id entry:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
 module.exports = router;
 
 
