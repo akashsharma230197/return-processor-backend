@@ -350,64 +350,54 @@ router.get('/login_id', async (req, res) => {
 
 
 
-router.get('/', async (req, res) => {
+router.get('/portal_id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM portal_id ORDER BY id DESC');
     res.json(result.rows);
   } catch (err) {
-    console.error('Error fetching portal_id entries:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Failed to fetch portal_id data' });
   }
 });
 
-// Add new portal_id entry
-router.post('/', async (req, res) => {
+// Add a new portal_id entry
+router.post('/portal_id', async (req, res) => {
   const { company, portal, login_id } = req.body;
-  if (!company || !portal || !login_id) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
   try {
-    await pool.query(
-      'INSERT INTO portal_id (company, portal, login_id) VALUES ($1, $2, $3)',
+    const result = await pool.query(
+      'INSERT INTO portal_id (company, portal, login_id) VALUES ($1, $2, $3) RETURNING *',
       [company, portal, login_id]
     );
-    res.status(201).json({ message: 'Entry added' });
+    res.json(result.rows[0]);
   } catch (err) {
-    console.error('Error adding portal_id entry:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Failed to insert portal_id' });
   }
 });
 
-// Update portal_id entry
-router.put('/:id', async (req, res) => {
+// Update a portal_id entry
+router.put('/portal_id/:id', async (req, res) => {
   const { id } = req.params;
   const { company, portal, login_id } = req.body;
   try {
-    await pool.query(
-      'UPDATE portal_id SET company = $1, portal = $2, login_id = $3 WHERE id = $4',
+    const result = await pool.query(
+      'UPDATE portal_id SET company = $1, portal = $2, login_id = $3 WHERE id = $4 RETURNING *',
       [company, portal, login_id, id]
     );
-    res.json({ message: 'Entry updated' });
+    res.json(result.rows[0]);
   } catch (err) {
-    console.error('Error updating portal_id entry:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Failed to update portal_id' });
   }
 });
 
-// Delete portal_id entry
-router.delete('/:id', async (req, res) => {
+// Delete a portal_id entry
+router.delete('/portal_id/:id', async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM portal_id WHERE id = $1', [id]);
-    res.json({ message: 'Entry deleted' });
+    res.json({ success: true });
   } catch (err) {
-    console.error('Error deleting portal_id entry:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Failed to delete portal_id' });
   }
 });
-
-
-
 
 
 
