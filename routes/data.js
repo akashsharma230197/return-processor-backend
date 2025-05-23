@@ -308,11 +308,13 @@ router.get("/billing/distinct-companies", async (req, res) => {
 
 
 
-router.get('/api/data/login_id', async (req, res) => {
+
+// Route to fetch login_id based on company and portal
+router.get('/login_id', async (req, res) => {
   const { company, portal } = req.query;
 
   if (!company || !portal) {
-    return res.status(400).json({ error: 'Company and portal are required.' });
+    return res.status(400).json({ error: 'Company and portal are required' });
   }
 
   try {
@@ -332,9 +334,10 @@ router.get('/api/data/login_id', async (req, res) => {
   }
 });
 
-
-
-
-
-
 module.exports = router;
+
+
+
+
+
+
