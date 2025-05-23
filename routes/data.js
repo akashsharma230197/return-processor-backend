@@ -402,6 +402,26 @@ router.delete('/portal_id/:id', async (req, res) => {
 
 
 
+router.get('/api/billing_dashboard', async (req, res) => {
+  const { from, to } = req.query;
+  if (!from || !to) return res.status(400).json({ error: 'Missing from or to date' });
+
+  try {
+    const query = `
+      SELECT id, design, quantity, company, portal, date, user_id, created_at
+      FROM billing
+      WHERE date BETWEEN $1 AND $2
+      ORDER BY date ASC;
+    `;
+    const result = await pool.query(query, [from, to]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Billing fetch error:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
 
 
 module.exports = router;
