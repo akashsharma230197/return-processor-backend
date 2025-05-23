@@ -402,7 +402,7 @@ router.delete('/portal_id/:id', async (req, res) => {
 
 
 
-router.get('/api/billing_dashboard', async (req, res) => {
+router.get('/billing_dashboard', async (req, res) => {
   const { from, to } = req.query;
   if (!from || !to) return res.status(400).json({ error: 'Missing from or to date' });
 
