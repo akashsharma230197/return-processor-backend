@@ -423,6 +423,54 @@ router.get('/billing_dashboard', async (req, res) => {
 
 
 
+// PUT /billing/:id - Update a billing entry
+router.put('/billing/:id', async (req, res) => {
+  const { id } = req.params;
+  const { user_id, company, portal, date, design, quantity } = req.body;
+
+  if (!user_id || !company || !portal || !date || !design || !quantity) {
+    return res.status(400).json({ error: 'Missing fields in billing update.' });
+  }
+
+  try {
+    const updateQuery = `
+      UPDATE billing
+      SET user_id = $1, company = $2, portal = $3, date = $4, design = $5, quantity = $6
+      WHERE id = $7
+    `;
+    const result = await pool.query(updateQuery, [user_id, company, portal, date, design, quantity, id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Billing entry not found.' });
+    }
+
+    res.status(200).json({ message: 'Billing entry updated successfully.' });
+  } catch (error) {
+    console.error('Error updating billing data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /billing/:id - Delete a billing entry
+router.delete('/billing/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deleteQuery = `DELETE FROM billing WHERE id = $1`;
+    const result = await pool.query(deleteQuery, [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Billing entry not found.' });
+    }
+
+    res.status(200).json({ message: 'Billing entry deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting billing data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 module.exports = router;
 
