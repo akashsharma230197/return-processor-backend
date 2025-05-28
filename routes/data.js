@@ -501,6 +501,144 @@ router.get("/me", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// GET all returnmaster records for a given date (optional company filter)
+router.get('/returnmaster', async (req, res) => {
+  const { date, company } = req.query;
+  try {
+    let query = 'SELECT * FROM returnmaster WHERE date = $1';
+    const params = [date];
+
+    if (company) {
+      query += ' AND company = $2';
+      params.push(company);
+    }
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching returnmaster:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// UPDATE a returnmaster record by id
+router.put('/returnmaster/:id', async (req, res) => {
+  const { id } = req.params;
+  const { user_id, company, courier, date, no_return } = req.body;
+  try {
+    await pool.query(
+      `UPDATE returnmaster SET user_id=$1, company=$2, courier=$3, date=$4, no_return=$5 WHERE id=$6`,
+      [user_id, company, courier, date, no_return, id]
+    );
+    res.json({ message: 'ReturnMaster entry updated successfully' });
+  } catch (err) {
+    console.error('Error updating returnmaster:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE a returnmaster record by id
+router.delete('/returnmaster/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM returnmaster WHERE id = $1', [id]);
+    res.json({ message: 'ReturnMaster entry deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting returnmaster:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// GET all returndetailedentry records for a given date (optional company filter)
+router.get('/returndetailedentry', async (req, res) => {
+  const { date, company } = req.query;
+  try {
+    let query = 'SELECT * FROM returndetailedentry WHERE date = $1';
+    const params = [date];
+
+    if (company) {
+      query += ' AND company = $2';
+      params.push(company);
+    }
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching returndetailedentry:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// UPDATE a returndetailedentry record by id
+router.put('/returndetailedentry/:id', async (req, res) => {
+  const { id } = req.params;
+  const { user_id, company, courier, date, design, quantity } = req.body;
+  try {
+    await pool.query(
+      `UPDATE returndetailedentry SET user_id=$1, company=$2, courier=$3, date=$4, design=$5, quantity=$6 WHERE id=$7`,
+      [user_id, company, courier, date, design, quantity, id]
+    );
+    res.json({ message: 'ReturnDetailedEntry updated successfully' });
+  } catch (err) {
+    console.error('Error updating returndetailedentry:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE a returndetailedentry record by id
+router.delete('/returndetailedentry/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM returndetailedentry WHERE id = $1', [id]);
+    res.json({ message: 'ReturnDetailedEntry deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting returndetailedentry:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
 module.exports = router;
 
 
