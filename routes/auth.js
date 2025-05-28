@@ -53,7 +53,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    res.json({ id: user.id, username: user.username }); // No token for simplicity
+    // Include 'access' in the response
+    res.json({
+      id: user.id,
+      username: user.username,
+      access: user.access
+    });
 
   } catch (err) {
     console.error(err);
