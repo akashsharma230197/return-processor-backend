@@ -57,7 +57,11 @@ router.post('/login', async (req, res) => {
     res.json({
       id: user.id,
       username: user.username,
-      access: user.access
+      access: user.access,
+	privilage: user.privilage,
+	privilage1: user.privilage1,
+	privilage2: user.privilage2,
+	privilage3: user.privilage3
     });
 
   } catch (err) {
