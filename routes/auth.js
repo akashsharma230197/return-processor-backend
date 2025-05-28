@@ -23,7 +23,6 @@ router.post('/register', async (req, res) => {
 
   } catch (err) {
     if (err.code === '23505') {
-      // PostgreSQL unique_violation error code
       return res.status(500).json({ error: 'Username already taken' });
     }
 
@@ -53,15 +52,51 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Include 'access' in the response
     res.json({
       id: user.id,
       username: user.username,
-      access: user.access    });
+      access: user.access
+    });
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// 🔒 Change Password
+router.post('/change-password', async (req, res) => {
+  const { username, currentPassword, newPassword } = req.body;
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM users WHERE username = $1',
+      [username]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+
+    const user = result.rows[0];
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
+    }
+
+    const hashedNew = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      'UPDATE users SET password = $1 WHERE username = $2',
+      [hashedNew, username]
+    );
+
+    res.json({ message: 'Password updated successfully' });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong while changing password' });
   }
 });
 
