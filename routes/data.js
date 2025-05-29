@@ -44,7 +44,8 @@ const createMasterRoutes = (tableName) => {
         `DELETE FROM ${table} WHERE ${table} = $1`,
         [value]
       );
-      if (result.rowCount === 0) return res.status(404).json({ message: "Not found" });
+      if (re
+sult.rowCount === 0) return res.status(404).json({ message: "Not found" });
       res.json({ message: `${value} deleted` });
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -690,6 +691,29 @@ router.post('/companybillstatus', async (req, res) => {
   }
 });
 
+
+
+
+router.get('/readycompanies', async (req, res) => {
+  const { date } = req.query;
+
+  if (!date) {
+    return res.status(400).json({ error: 'Date is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT company FROM companybillstatus WHERE date = $1 AND status = $2',
+      [date, 'ready']
+    );
+
+    const readyCompanies = result.rows.map(row => row.company);
+    res.json({ readyCompanies });
+  } catch (err) {
+    console.error('Error fetching ready companies:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 module.exports = router;
