@@ -718,6 +718,59 @@ router.get('/readycompanies', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+router.post('/portalbillstatus', async (req, res) => {
+  const { company, portal, date, status } = req.body;
+  try {
+    const existing = await pool.query(
+      'SELECT * FROM portal_bill_status WHERE company = $1 AND portal = $2 AND date = $3',
+      [company, portal, date]
+    );
+
+    if (existing.rows.length > 0) {
+      await pool.query(
+        'UPDATE portal_bill_status SET status = $1 WHERE company = $2 AND portal = $3 AND date = $4',
+        [status, company, portal, date]
+      );
+    } else {
+      await pool.query(
+        'INSERT INTO portal_bill_status (company, portal, date, status) VALUES ($1, $2, $3, $4)',
+        [company, portal, date, status]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error updating portal bill status:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET: Get ready portals for a specific company and date
+router.get('/readyportals', async (req, res) => {
+  const { company, date } = req.query;
+  try {
+    const result = await pool.query(
+      'SELECT portal FROM portal_bill_status WHERE company = $1 AND date = $2 AND status = $3',
+      [company, date, 'ready']
+    );
+    const portals = result.rows.map(r => r.portal);
+    res.json({ readyPortals: portals });
+  } catch (err) {
+    console.error('Error fetching ready portals:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+
+
 module.exports = router;
 
 
