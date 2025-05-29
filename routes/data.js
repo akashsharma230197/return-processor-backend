@@ -638,7 +638,7 @@ router.delete('/returndetailedentry/:id', async (req, res) => {
 
 
 
-app.get('/companybillstatus', async (req, res) => {
+router.get('/companybillstatus', async (req, res) => {
   const { company, date } = req.query;
 
   if (!company || !date) {
@@ -665,7 +665,7 @@ app.get('/companybillstatus', async (req, res) => {
 
 
 
-app.post('/companybillstatus', async (req, res) => {
+router.post('/companybillstatus', async (req, res) => {
   const { company, date, status } = req.body;
 
   if (!company || !date || !['ready', 'not_ready'].includes(status)) {
