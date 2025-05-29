@@ -638,6 +638,59 @@ router.delete('/returndetailedentry/:id', async (req, res) => {
 
 
 
+route.get('/api/data/companybillstatus', async (req, res) => {
+  const { company, date } = req.query;
+
+  if (!company || !date) {
+    return res.status(400).json({ error: 'Missing company or date' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT status FROM company_bill_status WHERE company = $1 AND date = $2',
+      [company, date]
+    );
+
+    if (result.rows.length > 0) {
+      res.json({ status: result.rows[0].status });
+    } else {
+      res.json({ status: null }); // Not set
+    }
+  } catch (err) {
+    console.error('Error fetching company billing status:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
+route.post('/api/data/companybillstatus', async (req, res) => {
+  const { company, date, status } = req.body;
+
+  if (!company || !date || !['ready', 'not_ready'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
+  try {
+    await pool.query(
+      `
+      INSERT INTO company_bill_status (company, date, status)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (company, date)
+      DO UPDATE SET status = EXCLUDED.status
+      `,
+      [company, date, status]
+    );
+
+    res.json({ message: 'Status updated successfully' });
+  } catch (err) {
+    console.error('Error updating company billing status:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 module.exports = router;
 
