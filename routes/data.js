@@ -703,7 +703,7 @@ router.get('/readycompanies', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT company FROM companybillstatus WHERE date = $1 AND status = $2',
+      'SELECT company FROM company_bill_status WHERE date = $1 AND status = $2',
       [date, 'ready']
     );
 
