@@ -694,26 +694,7 @@ router.post('/companybillstatus', async (req, res) => {
 
 
 
-router.get('/readycompanies', async (req, res) => {
-  const { date } = req.query;
 
-  if (!date) {
-    return res.status(400).json({ error: 'Date is required' });
-  }
-
-  try {
-    const result = await pool.query(
-      'SELECT company FROM company_bill_status WHERE date = $1 AND status = $2',
-      [date, 'ready']
-    );
-
-    const readyCompanies = result.rows.map(row => row.company);
-    res.json({ readyCompanies });
-  } catch (err) {
-    console.error('Error fetching ready companies:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 
 module.exports = router;
