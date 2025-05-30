@@ -809,8 +809,9 @@ router.post('/markcompanybilled', async (req, res) => {
   try {
     await db.query(
       `INSERT INTO company_bill_status (company, date, status)
-       VALUES ($1, $2, $3)
-           );
+       VALUES ($1, $2, $3)`,
+      [company, date, status]
+    );
 
     res.json({ message: `Company marked as ${status} successfully` });
   } catch (error) {
