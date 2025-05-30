@@ -45,4 +45,61 @@ router.delete('/Units/:id', async (req, res) => {
   }
 });
 
+
+
+router.get('/party', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM party ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch parties' });
+  }
+});
+
+// POST a new party
+router.post('/party', async (req, res) => {
+  const { party_name, party_address, mobile_number } = req.body;
+  if (!party_name || !party_address || !mobile_number) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO party (party_name, party_address, mobile_number) VALUES ($1, $2, $3) RETURNING *',
+      [party_name, party_address, mobile_number]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add party' });
+  }
+});
+
+// PUT (update) a party
+router.put('/party/:id', async (req, res) => {
+  const { id } = req.params;
+  const { party_name, party_address, mobile_number } = req.body;
+
+  try {
+    const result = await pool.query(
+      'UPDATE party SET party_name = $1, party_address = $2, mobile_number = $3 WHERE id = $4 RETURNING *',
+      [party_name, party_address, mobile_number, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update party' });
+  }
+});
+
+// DELETE a party
+router.delete('/party/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await pool.query('DELETE FROM party WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete party' });
+  }
+});
+
 module.exports = router;
