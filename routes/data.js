@@ -802,21 +802,29 @@ router.get('/billedcompanies', async (req, res) => {
 router.post('/markcompanybilled', async (req, res) => {
   const { company, date, status } = req.body;
 
+  console.log('🔔 Incoming request body:', req.body);
+
   if (!company || !date || !status) {
+    console.error('❌ Missing required fields:', req.body);
     return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
     await db.query(
       `INSERT INTO company_bill_status (company, date, status)
-       VALUES ($1, $2, $3)`,
+       VALUES ($1, $2, $3)
+       ON CONFLICT (company, date)
+       DO UPDATE SET status = EXCLUDED.status`,
       [company, date, status]
     );
 
     res.json({ message: `Company marked as ${status} successfully` });
   } catch (error) {
-    console.error('Error updating company billing status:', error);
-    res.status(500).json({ message: 'Failed to update company billing status' });
+    console.error('❌ Detailed SQL error:', error);
+    res.status(500).json({
+      message: 'Failed to update company billing status',
+      error: error.message
+    });
   }
 });
 
