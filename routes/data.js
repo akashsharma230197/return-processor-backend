@@ -782,7 +782,7 @@ router.get('/billedcompanies', async (req, res) => {
   }
 
   try {
-    const result = await db.query(
+    const result = await pool.query(
       `SELECT company FROM company_bill_status
        WHERE date = $1 AND status = 'billed'`,
       [date]
@@ -810,7 +810,7 @@ router.post('/markcompanybilled', async (req, res) => {
   }
 
   try {
-    await db.query(
+    await pool.query(
       `INSERT INTO company_bill_status (company, date, status)
        VALUES ($1, $2, $3)
        ON CONFLICT (company, date)
