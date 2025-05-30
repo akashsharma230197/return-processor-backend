@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // your PostgreSQL connection
+const pool = require('../db/database'); // your PostgreSQL connection
 
 // GET all units
 router.get('/Units', async (req, res) => {
