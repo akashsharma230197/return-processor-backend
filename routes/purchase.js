@@ -102,4 +102,112 @@ router.delete('/party/:id', async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+router.get('/category', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM category ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST new category
+router.post('/category', async (req, res) => {
+  const { category } = req.body;
+  if (!category || !category.trim()) {
+    return res.status(400).json({ error: 'Category is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO category (category) VALUES ($1) RETURNING *',
+      [category.trim()]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    if (error.code === '23505') {
+      res.status(400).json({ error: 'Category already exists' });
+    } else {
+      console.error('Error adding category:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+});
+
+// DELETE category by ID
+router.delete('/category/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM category WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
+
+router.get('/item', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM item ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching items:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST new item
+router.post('/item', async (req, res) => {
+  const { category, item_name, unit } = req.body;
+
+  if (!category || !item_name || !unit) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO item (category, item_name, unit) VALUES ($1, $2, $3) RETURNING *',
+      [category, item_name, unit]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('Error inserting item:', err);
+    res.status(500).json({ error: 'Failed to insert item' });
+  }
+});
+
+// DELETE item (optional)
+router.delete('/item/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM item WHERE id = $1', [id]);
+    res.status(200).json({ message: 'Item deleted' });
+  } catch (err) {
+    console.error('Error deleting item:', err);
+    res.status(500).json({ error: 'Failed to delete item' });
+  }
+});
+
+
+
+
+
+
+
+
+
 module.exports = router;
