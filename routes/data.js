@@ -771,6 +771,62 @@ router.get('/readyportals', async (req, res) => {
 
 
 
+
+
+// GET /api/data/billedcompanies?date=YYYY-MM-DD
+router.get('/billedcompanies', async (req, res) => {
+  const { date } = req.query;
+
+  if (!date) {
+    return res.status(400).json({ message: "Date is required" });
+  }
+
+  try {
+    const result = await db.query(
+      `SELECT company FROM company_bill_status
+       WHERE date = $1 AND status = 'billed'`,
+      [date]
+    );
+
+    const billedCompanies = result.rows.map(row => row.company);
+    res.json({ billedCompanies });
+  } catch (error) {
+    console.error('Error fetching billed companies:', error);
+    res.status(500).json({ message: 'Failed to fetch billed companies' });
+  }
+});
+
+
+
+
+// POST /api/data/markcompanybilled
+router.post('/markcompanybilled', async (req, res) => {
+  const { company, date, status } = req.body;
+
+  if (!company || !date || !status) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  try {
+    await db.query(
+      `INSERT INTO company_bill_status (company, date, status)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (company, date)
+       DO UPDATE SET status = EXCLUDED.status`,
+      [company, date, status]
+    );
+
+    res.json({ message: `Company marked as ${status} successfully` });
+  } catch (error) {
+    console.error('Error updating company billing status:', error);
+    res.status(500).json({ message: 'Failed to update company billing status' });
+  }
+});
+
+
+
+
+
 module.exports = router;
 
 
