@@ -810,10 +810,7 @@ router.post('/markcompanybilled', async (req, res) => {
     await db.query(
       `INSERT INTO company_bill_status (company, date, status)
        VALUES ($1, $2, $3)
-       ON CONFLICT (company, date)
-       DO UPDATE SET status = EXCLUDED.status`,
-      [company, date, status]
-    );
+           );
 
     res.json({ message: `Company marked as ${status} successfully` });
   } catch (error) {
