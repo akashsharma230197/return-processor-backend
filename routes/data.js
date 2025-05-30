@@ -799,7 +799,6 @@ router.get('/billedcompanies', async (req, res) => {
 
 
 
-// POST /api/data/markcompanybilled
 router.post('/markcompanybilled', async (req, res) => {
   const { company, date, status } = req.body;
 
