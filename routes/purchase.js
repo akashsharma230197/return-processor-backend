@@ -334,6 +334,50 @@ router.patch('/update/:id', async (req, res) => {
 });
 
 
+router.get('/approved-but-not-finalized', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM purchase_entry 
+       WHERE submit = 'yes' 
+         AND quantity_check = 'yes' 
+         AND approval = 'no'`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching approved-but-not-finalized entries:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
+router.patch('/approve/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const result = await pool.query(
+      `UPDATE purchase_entry 
+       SET approval = 'yes' 
+       WHERE purchase_id = $1 
+       RETURNING *`,
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Purchase entry not found' });
+    }
+
+    res.json({ message: 'Approval updated successfully', data: result.rows[0] });
+  } catch (err) {
+    console.error('Error updating approval:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
 
 
 
