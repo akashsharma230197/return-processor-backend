@@ -264,7 +264,7 @@ router.delete('/purchasers/:id', async (req, res) => {
 router.post('/entry', async (req, res) => {
   const {
     party,
-    date,s
+    date,
     purchaser,
     item,
     quantity,
