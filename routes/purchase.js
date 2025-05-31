@@ -205,7 +205,33 @@ router.delete('/item/:id', async (req, res) => {
 
 
 
+router.put('/purchase/data/item/:id', async (req, res) => {
+  const { id } = req.params;
+  const { category, item_name, unit } = req.body;
 
+  if (!category || !item_name || !unit) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE items
+       SET category = $1, item_name = $2, unit = $3
+       WHERE id = $4
+       RETURNING *`,
+      [category, item_name, unit, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    res.json({ message: 'Item updated successfully', item: result.rows[0] });
+  } catch (error) {
+    console.error('Error updating item:', error.message);
+    res.status(500).json({ error: 'Failed to update item' });
+  }
+});
 
 
 
