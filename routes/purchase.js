@@ -421,7 +421,7 @@ router.patch('/entry-to-billed/:id', async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE purchase_entry 
-       SET billing = 'yes' 
+       SET billed = 'yes' 
        WHERE purchase_id = $1 
        RETURNING *`,
       [id]
