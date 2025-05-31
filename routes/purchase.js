@@ -205,38 +205,12 @@ router.delete('/item/:id', async (req, res) => {
 
 
 
-router.put('/purchase/data/item/:id', async (req, res) => {
-  const { id } = parseInt(req.params.id);;
-  const { category, item_name, unit } = req.body;
-
-  if (!category || !item_name || !unit) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
-
-  try {
-    const result = await pool.query(
-      `UPDATE item
-       SET category = $1, item_name = $2, unit = $3
-       WHERE id = $4
-       RETURNING *`,
-      [category, item_name, unit, id]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Item not found' });
-    }
-
-    res.json({ message: 'Item updated successfully', item: result.rows[0] });
-  } catch (error) {
-    console.error('Error updating item:', error.message);
-    res.status(500).json({ error: 'Failed to update item' });
-  }
-});
 
 
 
 
-router.get('/data/purchasers', async (req, res) => {
+
+router.get('/purchasers', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM purchaser ORDER BY purchaser_name');
     res.json(result.rows);
@@ -247,7 +221,7 @@ router.get('/data/purchasers', async (req, res) => {
 });
 
 // ADD a purchaser
-router.post('/data/purchasers', async (req, res) => {
+router.post('/purchasers', async (req, res) => {
   const { purchaser_name } = req.body;
   if (!purchaser_name) {
     return res.status(400).json({ error: 'Purchaser name is required' });
@@ -266,7 +240,7 @@ router.post('/data/purchasers', async (req, res) => {
 });
 
 // DELETE a purchaser by ID
-router.delete('/data/purchasers/:id', async (req, res) => {
+router.delete('/purchasers/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -287,7 +261,7 @@ router.delete('/data/purchasers/:id', async (req, res) => {
 
 
 
-router.post('/purchase/data/entry', async (req, res) => {
+router.post('/entry', async (req, res) => {
   const {
     party,
     date,
