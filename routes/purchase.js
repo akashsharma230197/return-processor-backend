@@ -206,7 +206,7 @@ router.delete('/item/:id', async (req, res) => {
 
 
 router.put('/purchase/data/item/:id', async (req, res) => {
-  const { id } = req.params;
+  const { id } = parseInt(req.params.id);;
   const { category, item_name, unit } = req.body;
 
   if (!category || !item_name || !unit) {
