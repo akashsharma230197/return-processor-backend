@@ -264,7 +264,7 @@ router.delete('/purchasers/:id', async (req, res) => {
 router.post('/entry', async (req, res) => {
   const {
     party,
-    date,
+    date,s
     purchaser,
     item,
     quantity,
@@ -285,6 +285,20 @@ router.post('/entry', async (req, res) => {
   } catch (error) {
     console.error('Error inserting purchase entry:', error.message);
     res.status(500).json({ error: 'Failed to insert entry' });
+  }
+});
+
+
+
+router.get('/unchecked', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM purchase_entry WHERE submit = 'yes' AND quantity_check = 'no'`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching unchecked purchase entries:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
