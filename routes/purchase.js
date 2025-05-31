@@ -443,6 +443,20 @@ router.patch('/entry-to-billed/:id', async (req, res) => {
 
 
 
+router.get('/all-purchases', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM purchase_entry `
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching Dashboard', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
 
 
 
