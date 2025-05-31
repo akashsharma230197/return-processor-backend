@@ -307,5 +307,34 @@ router.get('/unchecked', async (req, res) => {
 
 
 
+router.patch('/update/:id', async (req, res) => {
+  const id = req.params.id;
+  const { final_quantity, quantity_check, checker } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE purchase_entry 
+       SET final_quantity = $1, 
+           quantity_check = $2, 
+           checker = $3 
+       WHERE purchase_id = $4 
+       RETURNING *`,
+      [final_quantity, quantity_check, checker, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Purchase entry not found' });
+    }
+
+    res.json({ message: 'Updated successfully', data: result.rows[0] });
+  } catch (err) {
+    console.error('Error updating purchase entry:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
 
 module.exports = router;
